@@ -37,7 +37,7 @@ export default async function StartServicePage({
     .single()
 
   return (
-    <main style={{ padding: 24, fontFamily: 'Arial, sans-serif' }}>
+    <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', maxWidth: 700 }}>
       <h1>Service starten</h1>
 
       {guide && (
@@ -63,6 +63,40 @@ export default async function StartServicePage({
           <strong>Seriennummer:</strong> {deviceData.serial_number}
         </div>
       )}
+
+      {(guideError || deviceError || customerError) && (
+        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
+          {JSON.stringify(
+            { guideError, deviceError, customerError },
+            null,
+            2
+          )}
+        </pre>
+      )}
+
+      <form action="/services/start/submit" method="get">
+        <input type="hidden" name="guideId" value={guideId} />
+        <input type="hidden" name="deviceId" value={device ?? ''} />
+        <input type="hidden" name="customerId" value={customer ?? ''} />
+
+        <button
+          type="submit"
+          style={{
+            padding: '14px 18px',
+            borderRadius: 10,
+            border: '1px solid #111',
+            background: '#111',
+            color: '#fff',
+            cursor: 'pointer',
+            fontWeight: 700,
+          }}
+        >
+          Serviceauftrag starten
+        </button>
+      </form>
+    </main>
+  )
+}      )}
 
       {(guideError || deviceError || customerError) && (
         <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
