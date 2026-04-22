@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export default async function Home() {
   const { data: customers, error } = await supabase
@@ -14,8 +14,7 @@ export default async function Home() {
     <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
       <h1>Service App</h1>
 
-      <h2>Kunden</h2>
-
+      <p><strong>Supabase URL:</strong> {supabaseUrl}</p>
       <p><strong>Geladene Kunden:</strong> {customers?.length ?? 0}</p>
 
       {error && (
