@@ -6,15 +6,27 @@ const supabase = createClient(
 )
 
 export default async function Home() {
-  const { data: customers } = await supabase
+  const { data: customers, error } = await supabase
     .from('customers')
     .select('*')
 
   return (
-    <main style={{ padding: 20 }}>
+    <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
       <h1>Service App</h1>
 
       <h2>Kunden</h2>
+
+      <p><strong>Geladene Kunden:</strong> {customers?.length ?? 0}</p>
+
+      {error && (
+        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
+          {JSON.stringify(error, null, 2)}
+        </pre>
+      )}
+
+      {!error && customers && customers.length === 0 && (
+        <p>Keine Kunden gefunden.</p>
+      )}
 
       <ul>
         {customers?.map((c) => (
