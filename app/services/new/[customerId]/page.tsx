@@ -30,7 +30,7 @@ export default async function CustomerDevicesPage({
 
   return (
     <main style={{ padding: 24, fontFamily: 'Arial, sans-serif' }}>
-      <h1>Geräte auswählen Test 123</h1>
+      <h1>Geräte auswählen</h1>
 
       {customer && (
         <div style={{ marginBottom: 20, color: '#555' }}>
