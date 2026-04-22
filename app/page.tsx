@@ -1,34 +1,49 @@
-import { createClient } from '@supabase/supabase-js'
+import Link from 'next/link'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-export default async function Home() {
-  const { data: customers, error, count } = await supabase
-    .from('customers')
-    .select('id,name,city', { count: 'exact' })
+export default function Home() {
+  const buttonStyle = {
+    display: 'block',
+    padding: '18px 20px',
+    border: '1px solid #ddd',
+    borderRadius: '12px',
+    textDecoration: 'none',
+    color: '#111',
+    background: '#fff',
+    fontWeight: 600,
+    fontSize: '18px',
+  } as const
 
   return (
-    <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
-      <h1>Service App</h1>
-      <p><strong>Supabase URL:</strong> {supabaseUrl}</p>
-      <p><strong>Anzahl:</strong> {count ?? 'null'}</p>
+    <main
+      style={{
+        padding: 24,
+        fontFamily: 'Arial, sans-serif',
+        maxWidth: 700,
+        margin: '0 auto',
+      }}
+    >
+      <h1 style={{ fontSize: 32, marginBottom: 8 }}>Service App</h1>
+      <p style={{ color: '#555', marginBottom: 24 }}>
+        Willkommen. Wähle einen Bereich aus.
+      </p>
 
-      {error && (
-        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
-          {JSON.stringify(error, null, 2)}
-        </pre>
-      )}
+      <div style={{ display: 'grid', gap: 16 }}>
+        <Link href="/services/new" style={buttonStyle}>
+          Neuer Service
+        </Link>
 
-      <ul>
-        {customers?.map((c) => (
-          <li key={c.id}>
-            {c.name} – {c.city}
-          </li>
-        ))}
-      </ul>
+        <Link href="/services" style={buttonStyle}>
+          Laufende Services
+        </Link>
+
+        <Link href="/customers" style={buttonStyle}>
+          Kunden verwalten
+        </Link>
+
+        <Link href="/service-guides" style={buttonStyle}>
+          Service-Anleitungen verwalten
+        </Link>
+      </div>
     </main>
   )
 }
