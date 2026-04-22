@@ -16,19 +16,17 @@ export default async function SelectServiceGuidePage({
 }) {
   const { customerId, deviceId } = await params
 
-  // Gerät laden
-  const { data: device } = await supabase
+  const { data: device, error: deviceError } = await supabase
     .from('devices')
     .select('*')
     .eq('id', deviceId)
     .single()
 
-  // passende Service-Anleitungen laden
-  const { data: guides, error } = await supabase
+  const { data: guides, error: guidesError } = await supabase
     .from('service_guides')
     .select('*')
-    .eq('manufacturer', device?.manufacturer)
-    .eq('model', device?.model)
+    .eq('manufacturer', device?.manufacturer ?? '')
+    .eq('model', device?.model ?? '')
     .order('service_type', { ascending: true })
 
   return (
@@ -44,13 +42,31 @@ export default async function SelectServiceGuidePage({
         </div>
       )}
 
-      {error && (
-        <pre style={{ color: 'red' }}>
-          {JSON.stringify(error, null, 2)}
+      <pre style={{ background: '#f5f5f5', padding: 12, whiteSpace: 'pre-wrap' }}>
+        {JSON.stringify(
+          {
+            deviceManufacturer: device?.manufacturer,
+            deviceModel: device?.model,
+            guidesCount: guides?.length ?? 0,
+          },
+          null,
+          2
+        )}
+      </pre>
+
+      {deviceError && (
+        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
+          {JSON.stringify(deviceError, null, 2)}
         </pre>
       )}
 
-      {!error && guides?.length === 0 && (
+      {guidesError && (
+        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
+          {JSON.stringify(guidesError, null, 2)}
+        </pre>
+      )}
+
+      {!guidesError && guides?.length === 0 && (
         <p>Keine Service-Anleitungen gefunden.</p>
       )}
 
