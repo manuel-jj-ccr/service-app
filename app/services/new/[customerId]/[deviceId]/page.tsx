@@ -42,18 +42,6 @@ export default async function SelectServiceGuidePage({
         </div>
       )}
 
-      <pre style={{ background: '#f5f5f5', padding: 12, whiteSpace: 'pre-wrap' }}>
-        {JSON.stringify(
-          {
-            deviceManufacturer: device?.manufacturer,
-            deviceModel: device?.model,
-            guidesCount: guides?.length ?? 0,
-          },
-          null,
-          2
-        )}
-      </pre>
-
       {deviceError && (
         <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
           {JSON.stringify(deviceError, null, 2)}
