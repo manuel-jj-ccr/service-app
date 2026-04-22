@@ -1,49 +1,43 @@
-import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 
-export default function Home() {
-  const buttonStyle = {
-    display: 'block',
-    padding: '18px 20px',
-    border: '1px solid #ddd',
-    borderRadius: '12px',
-    textDecoration: 'none',
-    color: '#111',
-    background: '#fff',
-    fontWeight: 600,
-    fontSize: '18px',
-  } as const
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export default async function CustomersPage() {
+  const { data: customers, error } = await supabase
+    .from('customers')
+    .select('*')
+    .order('name', { ascending: true })
 
   return (
-    <main
-      style={{
-        padding: 24,
-        fontFamily: 'Arial, sans-serif',
-        maxWidth: 700,
-        margin: '0 auto',
-      }}
-    >
-      <h1 style={{ fontSize: 32, marginBottom: 8 }}>Service App</h1>
-      <p style={{ color: '#555', marginBottom: 24 }}>
-        Willkommen. Wähle einen Bereich aus.
-      </p>
+    <main style={{ padding: 24, fontFamily: 'Arial, sans-serif' }}>
+      <h1>Kunden verwalten</h1>
 
-      <div style={{ display: 'grid', gap: 16 }}>
-        <Link href="/services/new" style={buttonStyle}>
-          Neuer Service
-        </Link>
+      {error && (
+        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
+          {JSON.stringify(error, null, 2)}
+        </pre>
+      )}
 
-        <Link href="/services" style={buttonStyle}>
-          Laufende Services
-        </Link>
-
-        <Link href="/customers" style={buttonStyle}>
-          Kunden verwalten
-        </Link>
-
-        <Link href="/service-guides" style={buttonStyle}>
-          Service-Anleitungen verwalten
-        </Link>
-      </div>
+      <ul style={{ padding: 0, listStyle: 'none' }}>
+        {customers?.map((customer) => (
+          <li
+            key={customer.id}
+            style={{
+              border: '1px solid #ddd',
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 12,
+            }}
+          >
+            <div style={{ fontWeight: 700 }}>{customer.name}</div>
+            <div>{customer.city}</div>
+            <div style={{ color: '#666', fontSize: 14 }}>{customer.email}</div>
+          </li>
+        ))}
+      </ul>
     </main>
   )
 }
