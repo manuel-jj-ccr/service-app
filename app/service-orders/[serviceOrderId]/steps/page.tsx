@@ -100,27 +100,74 @@ export default async function ServiceOrderStepsPage({
             </div>
           )}
 
-          <div style={{ marginTop: 24 }}>
-            <form
-              action={`/service-orders/${serviceOrderId}/steps/complete`}
-              method="get"
-            >
-              <button
-                type="submit"
+          <form
+            action={`/service-orders/${serviceOrderId}/steps/complete`}
+            method="get"
+            style={{ marginTop: 24 }}
+          >
+            <div style={{ marginBottom: 16 }}>
+              <label
+                htmlFor="result"
+                style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}
+              >
+                Ergebnis
+              </label>
+              <select
+                id="result"
+                name="result"
+                defaultValue="ok"
                 style={{
-                  padding: '14px 18px',
+                  width: '100%',
+                  maxWidth: 320,
+                  padding: 12,
                   borderRadius: 10,
-                  border: '1px solid #111',
-                  background: '#111',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontWeight: 700,
+                  border: '1px solid #ccc',
+                  background: '#fff',
                 }}
               >
-                Schritt abschließen
-              </button>
-            </form>
-          </div>
+                <option value="ok">OK</option>
+                <option value="complication">Komplikation</option>
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label
+                htmlFor="note"
+                style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}
+              >
+                Notiz
+              </label>
+              <textarea
+                id="note"
+                name="note"
+                rows={5}
+                placeholder="Optional: Bemerkungen zu diesem Schritt"
+                style={{
+                  width: '100%',
+                  padding: 12,
+                  borderRadius: 10,
+                  border: '1px solid #ccc',
+                  background: '#fff',
+                  resize: 'vertical',
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              style={{
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                background: '#111',
+                color: '#fff',
+                cursor: 'pointer',
+                fontWeight: 700,
+              }}
+            >
+              Schritt abschließen
+            </button>
+          </form>
         </div>
       ) : (
         <div
