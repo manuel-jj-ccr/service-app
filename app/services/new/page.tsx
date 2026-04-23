@@ -12,7 +12,7 @@ const supabase = createClient(
 export default async function NewServicePage() {
   const { data: customers, error } = await supabase
     .from('customers')
-    .select('*')
+    .select('id, name, city')
     .order('name', { ascending: true })
 
   return (
@@ -21,16 +21,16 @@ export default async function NewServicePage() {
       <h2>Kunde auswählen</h2>
 
       {error && (
-        <pre style={{ color: 'red' }}>
+        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
           {JSON.stringify(error, null, 2)}
         </pre>
       )}
 
       <ul style={{ listStyle: 'none', padding: 0 }}>
-        {customers?.map((c) => (
-          <li key={c.id} style={{ marginBottom: 12 }}>
+        {customers?.map((customer) => (
+          <li key={customer.id} style={{ marginBottom: 12 }}>
             <Link
-              href={`/services/new/${c.id}`}
+              href={`/services/new/${customer.id}`}
               style={{
                 display: 'block',
                 padding: 16,
@@ -40,8 +40,8 @@ export default async function NewServicePage() {
                 color: '#111',
               }}
             >
-              <div style={{ fontWeight: 700 }}>{c.name}</div>
-              <div style={{ fontSize: 14, color: '#666' }}>{c.city}</div>
+              <div style={{ fontWeight: 700 }}>{customer.name}</div>
+              <div style={{ color: '#666', fontSize: 14 }}>{customer.city}</div>
             </Link>
           </li>
         ))}
