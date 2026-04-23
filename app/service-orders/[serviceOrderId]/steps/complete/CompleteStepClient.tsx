@@ -1,12 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
 export default function CompleteStepClient() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
   const serviceOrderId = params.serviceOrderId as string
+  const result = searchParams.get('result')
+  const note = searchParams.get('note')
 
   const [message, setMessage] = useState('Schritt wird abgeschlossen ...')
   const [error, setError] = useState<string | null>(null)
@@ -18,14 +22,21 @@ export default function CompleteStepClient() {
           `/api/service-orders/${serviceOrderId}/complete-step`,
           {
             method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              result,
+              note,
+            }),
           }
         )
 
-        const result = await response.json()
+        const resultData = await response.json()
 
         if (!response.ok) {
           throw new Error(
-            result?.error || 'Schritt konnte nicht abgeschlossen werden.'
+            resultData?.error || 'Schritt konnte nicht abgeschlossen werden.'
           )
         }
 
@@ -39,7 +50,7 @@ export default function CompleteStepClient() {
     if (serviceOrderId) {
       completeStep()
     }
-  }, [serviceOrderId, router])
+  }, [serviceOrderId, result, note, router])
 
   return (
     <>
