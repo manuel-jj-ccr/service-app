@@ -83,7 +83,7 @@ export default async function SelectServiceGuidePage({
         {guides?.map((guide) => (
           <li key={guide.id} style={{ marginBottom: 12 }}>
             <Link
-              href={`/services/start/${guide.id}?customerId=${customerId}&deviceId=${deviceId}`}
+              href={`/services/confirm/${guide.id}?customerId=${customerId}&deviceId=${deviceId}`}
               style={{
                 display: 'block',
                 border: '1px solid #ddd',
