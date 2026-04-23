@@ -62,24 +62,42 @@ export default async function ServiceOrderPage({
             }}
           >
             <p>Der Serviceauftrag wurde erfolgreich angelegt.</p>
-            <p>Als Nächstes bauen wir den ersten echten Serviceschritt.</p>
+            <p>Jetzt kannst du mit dem ersten Serviceschritt starten.</p>
           </div>
 
-          <Link
-            href="/services"
-            style={{
-              display: 'inline-block',
-              padding: '14px 18px',
-              borderRadius: 10,
-              border: '1px solid #111',
-              background: '#111',
-              color: '#fff',
-              textDecoration: 'none',
-              fontWeight: 700,
-            }}
-          >
-            Zur Service-Übersicht
-          </Link>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <Link
+              href={`/service-orders/${serviceOrderId}/steps`}
+              style={{
+                display: 'inline-block',
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                background: '#111',
+                color: '#fff',
+                textDecoration: 'none',
+                fontWeight: 700,
+              }}
+            >
+              Zum aktuellen Serviceschritt
+            </Link>
+
+            <Link
+              href="/services"
+              style={{
+                display: 'inline-block',
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                background: '#fff',
+                color: '#111',
+                textDecoration: 'none',
+                fontWeight: 700,
+              }}
+            >
+              Zur Service-Übersicht
+            </Link>
+          </div>
         </>
       )}
     </main>
