@@ -74,7 +74,7 @@ export default async function StartServicePage({
         </pre>
       )}
 
-      <form action="/services/start/submit" method="get">
+      <form action="/service-orders/create" method="get">
         <input type="hidden" name="guideId" value={guideId} />
         <input type="hidden" name="customerId" value={customerId ?? ''} />
         <input type="hidden" name="deviceId" value={deviceId ?? ''} />
