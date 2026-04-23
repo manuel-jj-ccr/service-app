@@ -62,10 +62,13 @@ export default async function ServiceOrderStepsPage({
           <div>
             <strong>Service:</strong> {order.guide_name_snapshot}
           </div>
+          <div>
+            <strong>Status:</strong> {order.status}
+          </div>
         </div>
       )}
 
-      {currentStep && (
+      {currentStep ? (
         <div
           style={{
             border: '1px solid #ddd',
@@ -98,21 +101,39 @@ export default async function ServiceOrderStepsPage({
           )}
 
           <div style={{ marginTop: 24 }}>
-            <button
-              disabled
-              style={{
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #999',
-                background: '#ddd',
-                color: '#666',
-                cursor: 'not-allowed',
-                fontWeight: 700,
-              }}
+            <form
+              action={`/service-orders/${serviceOrderId}/steps/complete`}
+              method="get"
             >
-              Schritt abschließen (kommt als Nächstes)
-            </button>
+              <button
+                type="submit"
+                style={{
+                  padding: '14px 18px',
+                  borderRadius: 10,
+                  border: '1px solid #111',
+                  background: '#111',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                }}
+              >
+                Schritt abschließen
+              </button>
+            </form>
           </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            border: '1px solid #ddd',
+            borderRadius: 12,
+            padding: 20,
+            marginBottom: 24,
+            background: '#fafafa',
+          }}
+        >
+          <h2>Keine weiteren Serviceschritte</h2>
+          <p>Der Service ist bereit für den Test.</p>
         </div>
       )}
 
