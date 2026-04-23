@@ -18,19 +18,19 @@ export default async function StartServicePage({
   const { guideId } = await params
   const { customerId, deviceId } = await searchParams
 
-  const { data: guide } = await supabase
+  const { data: guide, error: guideError } = await supabase
     .from('service_guides')
     .select('*')
     .eq('id', guideId)
     .single()
 
-  const { data: customer } = await supabase
+  const { data: customer, error: customerError } = await supabase
     .from('customers')
     .select('*')
     .eq('id', customerId ?? '')
     .single()
 
-  const { data: device } = await supabase
+  const { data: device, error: deviceError } = await supabase
     .from('devices')
     .select('*')
     .eq('id', deviceId ?? '')
@@ -64,16 +64,36 @@ export default async function StartServicePage({
         </div>
       )}
 
-      <div
-        style={{
-          border: '1px solid #ddd',
-          borderRadius: 12,
-          padding: 16,
-          background: '#fafafa',
-        }}
-      >
-        <p>Hier starten wir gleich den echten Serviceauftrag.</p>
-      </div>
+      {(guideError || customerError || deviceError) && (
+        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
+          {JSON.stringify(
+            { guideError, customerError, deviceError },
+            null,
+            2
+          )}
+        </pre>
+      )}
+
+      <form action="/services/start/submit" method="get">
+        <input type="hidden" name="guideId" value={guideId} />
+        <input type="hidden" name="customerId" value={customerId ?? ''} />
+        <input type="hidden" name="deviceId" value={deviceId ?? ''} />
+
+        <button
+          type="submit"
+          style={{
+            padding: '14px 18px',
+            borderRadius: 10,
+            border: '1px solid #111',
+            background: '#111',
+            color: '#fff',
+            cursor: 'pointer',
+            fontWeight: 700,
+          }}
+        >
+          Serviceauftrag starten
+        </button>
+      </form>
     </main>
   )
 }
