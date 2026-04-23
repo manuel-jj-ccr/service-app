@@ -12,6 +12,16 @@ export async function POST(
 ) {
   try {
     const { serviceOrderId } = await context.params
+    const body = await request.json()
+    const result = body?.result as string | undefined
+    const note = body?.note as string | undefined
+
+    if (!result || !['ok', 'complication'].includes(result)) {
+      return NextResponse.json(
+        { error: 'result muss "ok" oder "complication" sein.' },
+        { status: 400 }
+      )
+    }
 
     const { data: order, error: orderError } = await supabase
       .from('service_orders')
@@ -50,8 +60,8 @@ export async function POST(
         step_number: step.step_number,
         title_snapshot: step.title,
         instruction_snapshot: step.instruction,
-        result: 'ok',
-        note: null,
+        result,
+        note: note?.trim() ? note.trim() : null,
         photo_url: null,
         processed_at: new Date().toISOString(),
         processed_by: 'Oliver',
