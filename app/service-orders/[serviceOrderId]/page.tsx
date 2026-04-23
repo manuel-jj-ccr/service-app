@@ -75,21 +75,39 @@ export default async function ServiceOrderPage({
           </div>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
-            <Link
-              href={`/service-orders/${serviceOrderId}/steps`}
-              style={{
-                display: 'inline-block',
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #111',
-                background: '#111',
-                color: '#fff',
-                textDecoration: 'none',
-                fontWeight: 700,
-              }}
-            >
-              Zum aktuellen Serviceschritt
-            </Link>
+            {order.status === 'in_test' ? (
+              <Link
+                href={`/service-orders/${serviceOrderId}/test`}
+                style={{
+                  display: 'inline-block',
+                  padding: '14px 18px',
+                  borderRadius: 10,
+                  border: '1px solid #111',
+                  background: '#111',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  fontWeight: 700,
+                }}
+              >
+                Zum aktuellen Testschritt
+              </Link>
+            ) : (
+              <Link
+                href={`/service-orders/${serviceOrderId}/steps`}
+                style={{
+                  display: 'inline-block',
+                  padding: '14px 18px',
+                  borderRadius: 10,
+                  border: '1px solid #111',
+                  background: '#111',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  fontWeight: 700,
+                }}
+              >
+                Zum aktuellen Serviceschritt
+              </Link>
+            )}
 
             <Link
               href="/services"
