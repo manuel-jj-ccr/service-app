@@ -9,7 +9,10 @@ export default function Home() {
       <h1>Service App</h1>
       <p>Neu und sauber gestartet.</p>
 
-      <Link href="/test">Zur Testseite</Link>
+      <div style={{ display: 'grid', gap: 12 }}>
+        <Link href="/test">Zur Testseite</Link>
+        <Link href="/customers">Zu den Kunden</Link>
+      </div>
     </main>
   )
 }
