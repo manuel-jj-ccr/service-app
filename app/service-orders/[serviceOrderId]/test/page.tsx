@@ -37,35 +37,56 @@ export default async function ServiceOrderTestPage({
         .eq('step_number', currentTestStepNumber)
         .single()
 
-  return (
-    <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', maxWidth: 800 }}>
-      <h1>Abschlusstest</h1>
+  const { data: allTestSteps, error: allTestStepsError } = await supabase
+    .from('test_steps')
+    .select('id, step_number, title')
+    .eq('service_guide_id', order?.service_guide_id ?? '')
+    .order('step_number', { ascending: true })
 
-      {(orderError || testStepError) && (
-        <pre style={{ color: 'red' }}>
-          {JSON.stringify({ orderError, testStepError }, null, 2)}
+  return (
+    <main style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
+      <h1 style={{ marginBottom: 8 }}>Abschlusstest</h1>
+      <p className="muted" style={{ marginTop: 0, marginBottom: 24 }}>
+        Dokumentiere die Testergebnisse Schritt für Schritt.
+      </p>
+
+      {(orderError || testStepError || allTestStepsError) && (
+        <pre style={{ color: 'var(--danger)', whiteSpace: 'pre-wrap' }}>
+          {JSON.stringify(
+            { orderError, testStepError, allTestStepsError },
+            null,
+            2
+          )}
         </pre>
       )}
 
       {order && (
-        <div style={{ marginBottom: 20 }}>
-          <p><strong>Auftrag:</strong> {order.order_number}</p>
-          <p><strong>Gerät:</strong> {order.manufacturer_snapshot} {order.model_snapshot}</p>
-          <p><strong>Status:</strong> {order.status}</p>
-        </div>
+        <section className="card" style={{ marginBottom: 20 }}>
+          <h2 style={{ marginTop: 0 }}>Auftrag</h2>
+          <div><strong>Auftrag:</strong> {order.order_number}</div>
+          <div><strong>Gerät:</strong> {order.manufacturer_snapshot} {order.model_snapshot}</div>
+          <div><strong>Seriennummer:</strong> {order.serial_number_snapshot}</div>
+          <div><strong>Service:</strong> {order.guide_name_snapshot}</div>
+          <div><strong>Status:</strong> {order.status}</div>
+        </section>
       )}
 
-      {/* 🔥 FALL 1: SERVICE KOMPLETT FERTIG */}
       {serviceIsCompleted ? (
-        <div
+        <section
+          className="card"
           style={{
-            border: '2px solid #0a7',
-            borderRadius: 12,
-            padding: 20,
-            background: '#eafff7',
+            marginBottom: 24,
+            background:
+              order?.status === 'completed'
+                ? 'var(--success-bg)'
+                : 'var(--warning-bg)',
+            borderColor:
+              order?.status === 'completed'
+                ? 'var(--success-border)'
+                : 'var(--warning-border)',
           }}
         >
-          <h2>
+          <h2 style={{ marginTop: 0 }}>
             {order?.status === 'completed'
               ? 'Service erfolgreich abgeschlossen'
               : 'Service abgeschlossen mit Befund'}
@@ -75,84 +96,154 @@ export default async function ServiceOrderTestPage({
             Alle Testschritte wurden durchgeführt und dokumentiert.
           </p>
 
-          {/* 🔥 NEU: PDF BUTTON DIREKT HIER */}
-          <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
-            
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
             <Link
               href={`/service-orders/${serviceOrderId}/report`}
-              style={{
-                padding: '14px 18px',
-                borderRadius: 10,
-                background: '#111',
-                color: '#fff',
-                textDecoration: 'none',
-                fontWeight: 700,
-              }}
+              className="button-primary"
             >
-              Servicebericht (PDF)
+              Servicebericht / PDF
             </Link>
 
             <Link
               href={`/service-orders/${serviceOrderId}`}
-              style={{
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #111',
-                textDecoration: 'none',
-                color: '#111',
-                fontWeight: 700,
-              }}
+              className="button-secondary"
             >
               Serviceauftrag ansehen
             </Link>
 
-            <Link
-              href="/services"
-              style={{
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #111',
-                textDecoration: 'none',
-                color: '#111',
-                fontWeight: 700,
-              }}
-            >
+            <Link href="/" className="button-secondary">
+              Zur Startseite
+            </Link>
+
+            <Link href="/services" className="button-secondary">
               Zur Übersicht
             </Link>
           </div>
-        </div>
+        </section>
       ) : currentTestStep ? (
-        /* 🔧 FALL 2: NORMALER TESTSCHRITT */
-        <div
-          style={{
-            border: '1px solid #ddd',
-            borderRadius: 12,
-            padding: 20,
-            background: '#fafafa',
-          }}
-        >
-          <h2>Testschritt {currentTestStep.step_number}</h2>
+        <section className="card" style={{ marginBottom: 24 }}>
+          <div className="muted" style={{ marginBottom: 8 }}>
+            Testschritt {currentTestStep.step_number}
+          </div>
 
-          <p>{currentTestStep.description}</p>
+          <h2 style={{ marginTop: 0 }}>{currentTestStep.title}</h2>
+
+          <p style={{ lineHeight: 1.6 }}>{currentTestStep.description}</p>
+
+          {currentTestStep.target_value_hint && (
+            <div style={{ marginTop: 16 }}>
+              <strong>Sollwert / Hinweis:</strong>
+              <div className="muted">{currentTestStep.target_value_hint}</div>
+            </div>
+          )}
+
+          {currentTestStep.unit && (
+            <div style={{ marginTop: 16 }}>
+              <strong>Einheit:</strong> {currentTestStep.unit}
+            </div>
+          )}
 
           <form
             action={`/service-orders/${serviceOrderId}/test/complete`}
             method="get"
-            style={{ marginTop: 20 }}
+            style={{ marginTop: 24, display: 'grid', gap: 16 }}
           >
-            <input name="measuredValue" placeholder="Messwert" />
+            <div>
+              <label htmlFor="measuredValue" style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>
+                Gemessener Wert
+              </label>
+              <input
+                id="measuredValue"
+                name="measuredValue"
+                type="text"
+                placeholder="z. B. 12.3"
+                style={{ width: '100%', maxWidth: 360 }}
+              />
+            </div>
 
-            <select name="passed" defaultValue="true">
-              <option value="true">Bestanden</option>
-              <option value="false">Nicht bestanden</option>
-            </select>
+            <div>
+              <label htmlFor="passed" style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>
+                Ergebnis
+              </label>
+              <select
+                id="passed"
+                name="passed"
+                defaultValue="true"
+                style={{ width: '100%', maxWidth: 360 }}
+              >
+                <option value="true">Bestanden</option>
+                <option value="false">Nicht bestanden</option>
+              </select>
+            </div>
 
-            <textarea name="remark" placeholder="Bemerkung" />
+            <div>
+              <label htmlFor="remark" style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>
+                Bemerkung
+              </label>
+              <textarea
+                id="remark"
+                name="remark"
+                rows={5}
+                placeholder="Optional: Bemerkungen zum Testschritt"
+                style={{ width: '100%' }}
+              />
+            </div>
 
-            <button type="submit">Testschritt abschließen</button>
+            <div>
+              <button type="submit" className="button-primary">
+                Testschritt abschließen
+              </button>
+            </div>
           </form>
-        </div>
-      ) : null}
+        </section>
+      ) : (
+        <section className="card" style={{ marginBottom: 24 }}>
+          <h2 style={{ marginTop: 0 }}>Keine weiteren Testschritte</h2>
+          <p>Der Abschlusstest ist fertig.</p>
+
+          <Link
+            href={`/service-orders/${serviceOrderId}`}
+            className="button-primary"
+          >
+            Serviceauftrag ansehen
+          </Link>
+        </section>
+      )}
+
+      {allTestSteps && allTestSteps.length > 0 && (
+        <section className="card">
+          <h3 style={{ marginTop: 0 }}>Alle Testschritte</h3>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            {allTestSteps.map((step) => (
+              <li
+                key={step.id}
+                style={{
+                  border: '1px solid var(--border)',
+                  borderRadius: 10,
+                  padding: 12,
+                  marginBottom: 10,
+                  background:
+                    step.step_number === currentTestStepNumber &&
+                    !serviceIsCompleted
+                      ? 'var(--panel-soft)'
+                      : 'transparent',
+                }}
+              >
+                <strong>Testschritt {step.step_number}:</strong> {step.title}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div style={{ marginTop: 24 }}>
+        <Link
+          href={`/service-orders/${serviceOrderId}`}
+          className="button-secondary"
+        >
+          Zurück zum Serviceauftrag
+        </Link>
+      </div>
     </main>
   )
 }
