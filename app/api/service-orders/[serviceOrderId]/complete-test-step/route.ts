@@ -56,26 +56,32 @@ export async function POST(
       )
     }
 
-    const { error: insertError } = await supabase
+    // 🔥 UPSERT statt INSERT
+    const { error: upsertError } = await supabase
       .from('test_results')
-      .insert({
-        service_order_id: order.id,
-        test_step_id: testStep.id,
-        step_number: testStep.step_number,
-        title_snapshot: testStep.title,
-        description_snapshot: testStep.description,
-        measured_value: measuredValue?.trim() ? measuredValue.trim() : null,
-        unit_snapshot: testStep.unit ?? null,
-        passed,
-        remark: remark?.trim() ? remark.trim() : null,
-        photo_url: null,
-        recorded_at: new Date().toISOString(),
-        recorded_by: 'Oliver',
-      })
+      .upsert(
+        {
+          service_order_id: order.id,
+          test_step_id: testStep.id,
+          step_number: testStep.step_number,
+          title_snapshot: testStep.title,
+          description_snapshot: testStep.description,
+          measured_value: measuredValue?.trim() || null,
+          unit_snapshot: testStep.unit ?? null,
+          passed,
+          remark: remark?.trim() || null,
+          photo_url: null,
+          recorded_at: new Date().toISOString(),
+          recorded_by: 'Oliver',
+        },
+        {
+          onConflict: 'service_order_id,step_number',
+        }
+      )
 
-    if (insertError) {
+    if (upsertError) {
       return NextResponse.json(
-        { error: 'Testergebnis konnte nicht gespeichert werden.', details: insertError },
+        { error: 'Testergebnis konnte nicht gespeichert werden.', details: upsertError },
         { status: 500 }
       )
     }
