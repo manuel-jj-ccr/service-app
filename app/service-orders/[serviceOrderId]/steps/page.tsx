@@ -41,11 +41,14 @@ export default async function ServiceOrderStepsPage({
     .order('step_number', { ascending: true })
 
   return (
-    <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', maxWidth: 800 }}>
-      <h1>Serviceschritt</h1>
+    <main style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
+      <h1 style={{ marginBottom: 8 }}>Serviceschritt</h1>
+      <p className="muted" style={{ marginTop: 0, marginBottom: 24 }}>
+        Arbeite die Wartung Schritt für Schritt ab.
+      </p>
 
       {(orderError || stepError || allStepsError) && (
-        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
+        <pre style={{ color: 'var(--danger)', whiteSpace: 'pre-wrap' }}>
           {JSON.stringify(
             { orderError, stepError, allStepsError },
             null,
@@ -55,123 +58,78 @@ export default async function ServiceOrderStepsPage({
       )}
 
       {order && (
-        <div style={{ marginBottom: 20, color: '#555' }}>
-          <div>
-            <strong>Auftrag:</strong> {order.order_number}
-          </div>
-          <div>
-            <strong>Gerät:</strong> {order.manufacturer_snapshot} {order.model_snapshot}
-          </div>
-          <div>
-            <strong>Service:</strong> {order.guide_name_snapshot}
-          </div>
-          <div>
-            <strong>Status:</strong> {order.status}
-          </div>
-        </div>
+        <section className="card" style={{ marginBottom: 20 }}>
+          <h2 style={{ marginTop: 0 }}>Auftrag</h2>
+          <div><strong>Auftrag:</strong> {order.order_number}</div>
+          <div><strong>Gerät:</strong> {order.manufacturer_snapshot} {order.model_snapshot}</div>
+          <div><strong>Seriennummer:</strong> {order.serial_number_snapshot}</div>
+          <div><strong>Service:</strong> {order.guide_name_snapshot}</div>
+          <div><strong>Status:</strong> {order.status}</div>
+        </section>
       )}
 
       {serviceIsInTest ? (
-        <div
+        <section
+          className="card"
           style={{
-            border: '1px solid #0a7',
-            borderRadius: 12,
-            padding: 20,
             marginBottom: 24,
-            background: '#eafff7',
+            background: 'var(--success-bg)',
+            borderColor: 'var(--success-border)',
           }}
         >
-          <h2>Serviceschritte abgeschlossen</h2>
-          <p>Alle Serviceschritte wurden dokumentiert. Der Auftrag ist bereit für den Abschlusstest.</p>
+          <h2 style={{ marginTop: 0 }}>Serviceschritte abgeschlossen</h2>
+          <p>
+            Alle Serviceschritte wurden dokumentiert. Der Auftrag ist bereit für
+            den Abschlusstest.
+          </p>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
             <Link
               href={`/service-orders/${serviceOrderId}/test`}
-              style={{
-                display: 'inline-block',
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #111',
-                background: '#111',
-                color: '#fff',
-                textDecoration: 'none',
-                fontWeight: 700,
-              }}
+              className="button-primary"
             >
               Abschlusstest starten
             </Link>
 
-            <Link
-              href="/"
-              style={{
-                display: 'inline-block',
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #111',
-                background: '#fff',
-                color: '#111',
-                textDecoration: 'none',
-                fontWeight: 700,
-              }}
-            >
+            <Link href="/" className="button-secondary">
               Zur Startseite
             </Link>
 
-            <Link
-              href="/services"
-              style={{
-                display: 'inline-block',
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #111',
-                background: '#fff',
-                color: '#111',
-                textDecoration: 'none',
-                fontWeight: 700,
-              }}
-            >
+            <Link href="/services" className="button-secondary">
               Zur Serviceübersicht
             </Link>
           </div>
-        </div>
+        </section>
       ) : currentStep ? (
-        <div
-          style={{
-            border: '1px solid #ddd',
-            borderRadius: 12,
-            padding: 20,
-            marginBottom: 24,
-            background: '#fafafa',
-          }}
-        >
-          <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>
+        <section className="card" style={{ marginBottom: 24 }}>
+          <div className="muted" style={{ marginBottom: 8 }}>
             Schritt {currentStep.step_number}
           </div>
 
           <h2 style={{ marginTop: 0 }}>{currentStep.title}</h2>
 
-          <p style={{ lineHeight: 1.5 }}>{currentStep.instruction}</p>
+          <p style={{ lineHeight: 1.6 }}>{currentStep.instruction}</p>
 
           {currentStep.hint && (
             <div style={{ marginTop: 16 }}>
               <strong>Hinweis:</strong>
-              <div>{currentStep.hint}</div>
+              <div className="muted">{currentStep.hint}</div>
             </div>
           )}
 
           {currentStep.spare_parts_hint && (
             <div style={{ marginTop: 16 }}>
               <strong>Benötigte Ersatzteile:</strong>
-              <div>{currentStep.spare_parts_hint}</div>
+              <div className="muted">{currentStep.spare_parts_hint}</div>
             </div>
           )}
 
           <form
             action={`/service-orders/${serviceOrderId}/steps/complete`}
             method="get"
-            style={{ marginTop: 24 }}
+            style={{ marginTop: 24, display: 'grid', gap: 16 }}
           >
-            <div style={{ marginBottom: 16 }}>
+            <div>
               <label
                 htmlFor="result"
                 style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}
@@ -182,21 +140,14 @@ export default async function ServiceOrderStepsPage({
                 id="result"
                 name="result"
                 defaultValue="ok"
-                style={{
-                  width: '100%',
-                  maxWidth: 320,
-                  padding: 12,
-                  borderRadius: 10,
-                  border: '1px solid #ccc',
-                  background: '#fff',
-                }}
+                style={{ width: '100%', maxWidth: 360 }}
               >
                 <option value="ok">OK</option>
                 <option value="complication">Komplikation</option>
               </select>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div>
               <label
                 htmlFor="note"
                 style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}
@@ -208,103 +159,60 @@ export default async function ServiceOrderStepsPage({
                 name="note"
                 rows={5}
                 placeholder="Optional: Bemerkungen zu diesem Schritt"
-                style={{
-                  width: '100%',
-                  padding: 12,
-                  borderRadius: 10,
-                  border: '1px solid #ccc',
-                  background: '#fff',
-                  resize: 'vertical',
-                }}
+                style={{ width: '100%' }}
               />
             </div>
 
-            <button
-              type="submit"
-              style={{
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #111',
-                background: '#111',
-                color: '#fff',
-                cursor: 'pointer',
-                fontWeight: 700,
-              }}
-            >
-              Schritt abschließen
-            </button>
+            <div>
+              <button type="submit" className="button-primary">
+                Schritt abschließen
+              </button>
+            </div>
           </form>
-        </div>
+        </section>
       ) : (
-        <div
-          style={{
-            border: '1px solid #ddd',
-            borderRadius: 12,
-            padding: 20,
-            marginBottom: 24,
-            background: '#fafafa',
-          }}
-        >
-          <h2>Keine weiteren Serviceschritte</h2>
+        <section className="card" style={{ marginBottom: 24 }}>
+          <h2 style={{ marginTop: 0 }}>Keine weiteren Serviceschritte</h2>
           <p>Der Service ist bereit für den Test.</p>
 
           <Link
             href={`/service-orders/${serviceOrderId}/test`}
-            style={{
-              display: 'inline-block',
-              marginTop: 16,
-              padding: '14px 18px',
-              borderRadius: 10,
-              border: '1px solid #111',
-              background: '#111',
-              color: '#fff',
-              textDecoration: 'none',
-              fontWeight: 700,
-            }}
+            className="button-primary"
           >
             Abschlusstest starten
           </Link>
-        </div>
+        </section>
       )}
 
       {allSteps && allSteps.length > 0 && (
-        <div>
-          <h3>Alle Schritte</h3>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+        <section className="card">
+          <h3 style={{ marginTop: 0 }}>Alle Serviceschritte</h3>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
             {allSteps.map((step) => (
               <li
                 key={step.id}
                 style={{
-                  border: '1px solid #eee',
+                  border: '1px solid var(--border)',
                   borderRadius: 10,
                   padding: 12,
                   marginBottom: 10,
                   background:
                     step.step_number === currentStepNumber && !serviceIsInTest
-                      ? '#f5f5f5'
-                      : '#fff',
+                      ? 'var(--panel-soft)'
+                      : 'transparent',
                 }}
               >
                 <strong>Schritt {step.step_number}:</strong> {step.title}
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       )}
 
       <div style={{ marginTop: 24 }}>
         <Link
           href={`/service-orders/${serviceOrderId}`}
-          style={{
-            display: 'inline-block',
-            padding: '12px 16px',
-            borderRadius: 10,
-            border: '1px solid #111',
-            background: '#fff',
-            color: '#111',
-            textDecoration: 'none',
-            fontWeight: 700,
-          }}
+          className="button-secondary"
         >
           Zurück zum Serviceauftrag
         </Link>
