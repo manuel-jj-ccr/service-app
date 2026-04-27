@@ -23,13 +23,17 @@ export default async function ServiceOrderTestPage({
     .single()
 
   const currentTestStepNumber = order?.current_test_step_number ?? 1
+  const serviceIsCompleted =
+    order?.status === 'completed' || order?.status === 'completed_with_findings'
 
-  const { data: currentTestStep, error: testStepError } = await supabase
-    .from('test_steps')
-    .select('*')
-    .eq('service_guide_id', order?.service_guide_id ?? '')
-    .eq('step_number', currentTestStepNumber)
-    .single()
+  const { data: currentTestStep, error: testStepError } = serviceIsCompleted
+    ? { data: null, error: null }
+    : await supabase
+        .from('test_steps')
+        .select('*')
+        .eq('service_guide_id', order?.service_guide_id ?? '')
+        .eq('step_number', currentTestStepNumber)
+        .single()
 
   const { data: allTestSteps, error: allTestStepsError } = await supabase
     .from('test_steps')
@@ -57,7 +61,8 @@ export default async function ServiceOrderTestPage({
             <strong>Auftrag:</strong> {order.order_number}
           </div>
           <div>
-            <strong>Gerät:</strong> {order.manufacturer_snapshot} {order.model_snapshot}
+            <strong>Gerät:</strong> {order.manufacturer_snapshot}{' '}
+            {order.model_snapshot}
           </div>
           <div>
             <strong>Service:</strong> {order.guide_name_snapshot}
@@ -68,7 +73,78 @@ export default async function ServiceOrderTestPage({
         </div>
       )}
 
-      {currentTestStep ? (
+      {serviceIsCompleted ? (
+        <div
+          style={{
+            border: '1px solid #0a7',
+            borderRadius: 12,
+            padding: 20,
+            marginBottom: 24,
+            background: order?.status === 'completed' ? '#eafff7' : '#fff7e6',
+          }}
+        >
+          <h2>
+            {order?.status === 'completed'
+              ? 'Service vollständig abgeschlossen'
+              : 'Service abgeschlossen mit Befund'}
+          </h2>
+
+          <p>
+            Alle Testschritte wurden dokumentiert. Der Serviceauftrag ist
+            abgeschlossen.
+          </p>
+
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
+            <Link
+              href={`/service-orders/${serviceOrderId}`}
+              style={{
+                display: 'inline-block',
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                background: '#111',
+                color: '#fff',
+                textDecoration: 'none',
+                fontWeight: 700,
+              }}
+            >
+              Serviceauftrag ansehen
+            </Link>
+
+            <Link
+              href="/"
+              style={{
+                display: 'inline-block',
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                background: '#fff',
+                color: '#111',
+                textDecoration: 'none',
+                fontWeight: 700,
+              }}
+            >
+              Zur Startseite
+            </Link>
+
+            <Link
+              href="/services"
+              style={{
+                display: 'inline-block',
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                background: '#fff',
+                color: '#111',
+                textDecoration: 'none',
+                fontWeight: 700,
+              }}
+            >
+              Zur Serviceübersicht
+            </Link>
+          </div>
+        </div>
+      ) : currentTestStep ? (
         <div
           style={{
             border: '1px solid #ddd',
@@ -203,6 +279,23 @@ export default async function ServiceOrderTestPage({
         >
           <h2>Keine weiteren Testschritte</h2>
           <p>Der Abschlusstest ist fertig.</p>
+
+          <Link
+            href={`/service-orders/${serviceOrderId}`}
+            style={{
+              display: 'inline-block',
+              marginTop: 16,
+              padding: '14px 18px',
+              borderRadius: 10,
+              border: '1px solid #111',
+              background: '#111',
+              color: '#fff',
+              textDecoration: 'none',
+              fontWeight: 700,
+            }}
+          >
+            Serviceauftrag ansehen
+          </Link>
         </div>
       )}
 
@@ -219,7 +312,10 @@ export default async function ServiceOrderTestPage({
                   padding: 12,
                   marginBottom: 10,
                   background:
-                    step.step_number === currentTestStepNumber ? '#f5f5f5' : '#fff',
+                    step.step_number === currentTestStepNumber &&
+                    !serviceIsCompleted
+                      ? '#f5f5f5'
+                      : '#fff',
                 }}
               >
                 <strong>Testschritt {step.step_number}:</strong> {step.title}
