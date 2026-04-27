@@ -36,20 +36,47 @@ export default async function ServiceReportPage({
     .order('step_number', { ascending: true })
 
   return (
-    <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', maxWidth: 900, margin: '0 auto' }}>
-      
+    <main
+      style={{
+        padding: 24,
+        fontFamily: 'Arial, sans-serif',
+        maxWidth: 900,
+        margin: '0 auto',
+      }}
+    >
       <style>
         {`
           @media print {
             .no-print {
               display: none !important;
             }
+
+            body {
+              background: #fff;
+            }
           }
         `}
       </style>
 
-      <div className="no-print" style={{ marginBottom: 20 }}>
+      <div
+        className="no-print"
+        style={{ display: 'flex', gap: 12, marginBottom: 20 }}
+      >
         <PrintButton />
+
+        <Link
+          href={`/service-orders/${serviceOrderId}`}
+          style={{
+            padding: '12px 16px',
+            borderRadius: 10,
+            border: '1px solid #111',
+            textDecoration: 'none',
+            color: '#111',
+            fontWeight: 700,
+          }}
+        >
+          Zurück
+        </Link>
       </div>
 
       <h1>Servicebericht</h1>
@@ -95,7 +122,7 @@ export default async function ServiceReportPage({
           <tr>
             <th style={th}>Nr</th>
             <th style={th}>Test</th>
-            <th style={th}>Wert</th>
+            <th style={th}>Messwert</th>
             <th style={th}>Ergebnis</th>
           </tr>
         </thead>
@@ -115,7 +142,6 @@ export default async function ServiceReportPage({
         <div style={{ borderTop: '1px solid #000', width: 200 }} />
         <p>Unterschrift</p>
       </div>
-
     </main>
   )
 }
@@ -123,10 +149,10 @@ export default async function ServiceReportPage({
 const th = {
   border: '1px solid #000',
   padding: 8,
-  background: '#eee'
+  background: '#eee',
 }
 
 const td = {
   border: '1px solid #000',
-  padding: 8
+  padding: 8,
 }
