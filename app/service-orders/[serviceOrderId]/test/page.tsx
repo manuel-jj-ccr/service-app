@@ -23,8 +23,10 @@ export default async function ServiceOrderTestPage({
     .single()
 
   const currentTestStepNumber = order?.current_test_step_number ?? 1
+
   const serviceIsCompleted =
-    order?.status === 'completed' || order?.status === 'completed_with_findings'
+    order?.status === 'completed' ||
+    order?.status === 'completed_with_findings'
 
   const { data: currentTestStep, error: testStepError } = serviceIsCompleted
     ? { data: null, error: null }
@@ -35,76 +37,69 @@ export default async function ServiceOrderTestPage({
         .eq('step_number', currentTestStepNumber)
         .single()
 
-  const { data: allTestSteps, error: allTestStepsError } = await supabase
-    .from('test_steps')
-    .select('id, step_number, title')
-    .eq('service_guide_id', order?.service_guide_id ?? '')
-    .order('step_number', { ascending: true })
-
   return (
     <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', maxWidth: 800 }}>
       <h1>Abschlusstest</h1>
 
-      {(orderError || testStepError || allTestStepsError) && (
-        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
-          {JSON.stringify(
-            { orderError, testStepError, allTestStepsError },
-            null,
-            2
-          )}
+      {(orderError || testStepError) && (
+        <pre style={{ color: 'red' }}>
+          {JSON.stringify({ orderError, testStepError }, null, 2)}
         </pre>
       )}
 
       {order && (
-        <div style={{ marginBottom: 20, color: '#555' }}>
-          <div>
-            <strong>Auftrag:</strong> {order.order_number}
-          </div>
-          <div>
-            <strong>Gerät:</strong> {order.manufacturer_snapshot}{' '}
-            {order.model_snapshot}
-          </div>
-          <div>
-            <strong>Service:</strong> {order.guide_name_snapshot}
-          </div>
-          <div>
-            <strong>Status:</strong> {order.status}
-          </div>
+        <div style={{ marginBottom: 20 }}>
+          <p><strong>Auftrag:</strong> {order.order_number}</p>
+          <p><strong>Gerät:</strong> {order.manufacturer_snapshot} {order.model_snapshot}</p>
+          <p><strong>Status:</strong> {order.status}</p>
         </div>
       )}
 
+      {/* 🔥 FALL 1: SERVICE KOMPLETT FERTIG */}
       {serviceIsCompleted ? (
         <div
           style={{
-            border: '1px solid #0a7',
+            border: '2px solid #0a7',
             borderRadius: 12,
             padding: 20,
-            marginBottom: 24,
-            background: order?.status === 'completed' ? '#eafff7' : '#fff7e6',
+            background: '#eafff7',
           }}
         >
           <h2>
             {order?.status === 'completed'
-              ? 'Service vollständig abgeschlossen'
+              ? 'Service erfolgreich abgeschlossen'
               : 'Service abgeschlossen mit Befund'}
           </h2>
 
           <p>
-            Alle Testschritte wurden dokumentiert. Der Serviceauftrag ist
-            abgeschlossen.
+            Alle Testschritte wurden durchgeführt und dokumentiert.
           </p>
 
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
+          {/* 🔥 NEU: PDF BUTTON DIREKT HIER */}
+          <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
+            
             <Link
-              href={`/service-orders/${serviceOrderId}`}
+              href={`/service-orders/${serviceOrderId}/report`}
               style={{
-                display: 'inline-block',
                 padding: '14px 18px',
                 borderRadius: 10,
-                border: '1px solid #111',
                 background: '#111',
                 color: '#fff',
                 textDecoration: 'none',
+                fontWeight: 700,
+              }}
+            >
+              Servicebericht (PDF)
+            </Link>
+
+            <Link
+              href={`/service-orders/${serviceOrderId}`}
+              style={{
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                textDecoration: 'none',
+                color: '#111',
                 fontWeight: 700,
               }}
             >
@@ -112,236 +107,52 @@ export default async function ServiceOrderTestPage({
             </Link>
 
             <Link
-              href="/"
-              style={{
-                display: 'inline-block',
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #111',
-                background: '#fff',
-                color: '#111',
-                textDecoration: 'none',
-                fontWeight: 700,
-              }}
-            >
-              Zur Startseite
-            </Link>
-
-            <Link
               href="/services"
               style={{
-                display: 'inline-block',
                 padding: '14px 18px',
                 borderRadius: 10,
                 border: '1px solid #111',
-                background: '#fff',
-                color: '#111',
                 textDecoration: 'none',
+                color: '#111',
                 fontWeight: 700,
               }}
             >
-              Zur Serviceübersicht
+              Zur Übersicht
             </Link>
           </div>
         </div>
       ) : currentTestStep ? (
+        /* 🔧 FALL 2: NORMALER TESTSCHRITT */
         <div
           style={{
             border: '1px solid #ddd',
             borderRadius: 12,
             padding: 20,
-            marginBottom: 24,
             background: '#fafafa',
           }}
         >
-          <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>
-            Testschritt {currentTestStep.step_number}
-          </div>
+          <h2>Testschritt {currentTestStep.step_number}</h2>
 
-          <h2 style={{ marginTop: 0 }}>{currentTestStep.title}</h2>
-
-          <p style={{ lineHeight: 1.5 }}>{currentTestStep.description}</p>
-
-          {currentTestStep.target_value_hint && (
-            <div style={{ marginTop: 16 }}>
-              <strong>Sollwert / Hinweis:</strong>
-              <div>{currentTestStep.target_value_hint}</div>
-            </div>
-          )}
-
-          {currentTestStep.unit && (
-            <div style={{ marginTop: 16 }}>
-              <strong>Einheit:</strong> {currentTestStep.unit}
-            </div>
-          )}
+          <p>{currentTestStep.description}</p>
 
           <form
             action={`/service-orders/${serviceOrderId}/test/complete`}
             method="get"
-            style={{ marginTop: 24 }}
+            style={{ marginTop: 20 }}
           >
-            <div style={{ marginBottom: 16 }}>
-              <label
-                htmlFor="measuredValue"
-                style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}
-              >
-                Gemessener Wert
-              </label>
-              <input
-                id="measuredValue"
-                name="measuredValue"
-                type="text"
-                placeholder="z. B. 12.3"
-                style={{
-                  width: '100%',
-                  maxWidth: 320,
-                  padding: 12,
-                  borderRadius: 10,
-                  border: '1px solid #ccc',
-                  background: '#fff',
-                }}
-              />
-            </div>
+            <input name="measuredValue" placeholder="Messwert" />
 
-            <div style={{ marginBottom: 16 }}>
-              <label
-                htmlFor="passed"
-                style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}
-              >
-                Ergebnis
-              </label>
-              <select
-                id="passed"
-                name="passed"
-                defaultValue="true"
-                style={{
-                  width: '100%',
-                  maxWidth: 320,
-                  padding: 12,
-                  borderRadius: 10,
-                  border: '1px solid #ccc',
-                  background: '#fff',
-                }}
-              >
-                <option value="true">Bestanden</option>
-                <option value="false">Nicht bestanden</option>
-              </select>
-            </div>
+            <select name="passed" defaultValue="true">
+              <option value="true">Bestanden</option>
+              <option value="false">Nicht bestanden</option>
+            </select>
 
-            <div style={{ marginBottom: 16 }}>
-              <label
-                htmlFor="remark"
-                style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}
-              >
-                Bemerkung
-              </label>
-              <textarea
-                id="remark"
-                name="remark"
-                rows={5}
-                placeholder="Optional: Bemerkungen zum Testschritt"
-                style={{
-                  width: '100%',
-                  padding: 12,
-                  borderRadius: 10,
-                  border: '1px solid #ccc',
-                  background: '#fff',
-                  resize: 'vertical',
-                }}
-              />
-            </div>
+            <textarea name="remark" placeholder="Bemerkung" />
 
-            <button
-              type="submit"
-              style={{
-                padding: '14px 18px',
-                borderRadius: 10,
-                border: '1px solid #111',
-                background: '#111',
-                color: '#fff',
-                cursor: 'pointer',
-                fontWeight: 700,
-              }}
-            >
-              Testschritt abschließen
-            </button>
+            <button type="submit">Testschritt abschließen</button>
           </form>
         </div>
-      ) : (
-        <div
-          style={{
-            border: '1px solid #ddd',
-            borderRadius: 12,
-            padding: 20,
-            marginBottom: 24,
-            background: '#fafafa',
-          }}
-        >
-          <h2>Keine weiteren Testschritte</h2>
-          <p>Der Abschlusstest ist fertig.</p>
-
-          <Link
-            href={`/service-orders/${serviceOrderId}`}
-            style={{
-              display: 'inline-block',
-              marginTop: 16,
-              padding: '14px 18px',
-              borderRadius: 10,
-              border: '1px solid #111',
-              background: '#111',
-              color: '#fff',
-              textDecoration: 'none',
-              fontWeight: 700,
-            }}
-          >
-            Serviceauftrag ansehen
-          </Link>
-        </div>
-      )}
-
-      {allTestSteps && allTestSteps.length > 0 && (
-        <div>
-          <h3>Alle Testschritte</h3>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {allTestSteps.map((step) => (
-              <li
-                key={step.id}
-                style={{
-                  border: '1px solid #eee',
-                  borderRadius: 10,
-                  padding: 12,
-                  marginBottom: 10,
-                  background:
-                    step.step_number === currentTestStepNumber &&
-                    !serviceIsCompleted
-                      ? '#f5f5f5'
-                      : '#fff',
-                }}
-              >
-                <strong>Testschritt {step.step_number}:</strong> {step.title}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div style={{ marginTop: 24 }}>
-        <Link
-          href={`/service-orders/${serviceOrderId}`}
-          style={{
-            display: 'inline-block',
-            padding: '12px 16px',
-            borderRadius: 10,
-            border: '1px solid #111',
-            background: '#fff',
-            color: '#111',
-            textDecoration: 'none',
-            fontWeight: 700,
-          }}
-        >
-          Zurück zum Serviceauftrag
-        </Link>
-      </div>
+      ) : null}
     </main>
   )
 }
