@@ -37,9 +37,7 @@ export default function CompleteTestStepClient() {
         const resultData = await response.json()
 
         if (!response.ok) {
-          throw new Error(
-            resultData?.error || 'Testschritt konnte nicht abgeschlossen werden.'
-          )
+          throw new Error(JSON.stringify(resultData, null, 2))
         }
 
         setMessage('Testschritt erfolgreich abgeschlossen. Weiterleitung ...')
