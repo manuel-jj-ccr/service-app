@@ -23,13 +23,16 @@ export default async function ServiceOrderStepsPage({
     .single()
 
   const currentStepNumber = order?.current_service_step_number ?? 1
+  const serviceIsInTest = order?.status === 'in_test'
 
-  const { data: currentStep, error: stepError } = await supabase
-    .from('service_guide_steps')
-    .select('*')
-    .eq('service_guide_id', order?.service_guide_id ?? '')
-    .eq('step_number', currentStepNumber)
-    .single()
+  const { data: currentStep, error: stepError } = serviceIsInTest
+    ? { data: null, error: null }
+    : await supabase
+        .from('service_guide_steps')
+        .select('*')
+        .eq('service_guide_id', order?.service_guide_id ?? '')
+        .eq('step_number', currentStepNumber)
+        .single()
 
   const { data: allSteps, error: allStepsError } = await supabase
     .from('service_guide_steps')
@@ -68,7 +71,70 @@ export default async function ServiceOrderStepsPage({
         </div>
       )}
 
-      {currentStep ? (
+      {serviceIsInTest ? (
+        <div
+          style={{
+            border: '1px solid #0a7',
+            borderRadius: 12,
+            padding: 20,
+            marginBottom: 24,
+            background: '#eafff7',
+          }}
+        >
+          <h2>Serviceschritte abgeschlossen</h2>
+          <p>Alle Serviceschritte wurden dokumentiert. Der Auftrag ist bereit für den Abschlusstest.</p>
+
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
+            <Link
+              href={`/service-orders/${serviceOrderId}/test`}
+              style={{
+                display: 'inline-block',
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                background: '#111',
+                color: '#fff',
+                textDecoration: 'none',
+                fontWeight: 700,
+              }}
+            >
+              Abschlusstest starten
+            </Link>
+
+            <Link
+              href="/"
+              style={{
+                display: 'inline-block',
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                background: '#fff',
+                color: '#111',
+                textDecoration: 'none',
+                fontWeight: 700,
+              }}
+            >
+              Zur Startseite
+            </Link>
+
+            <Link
+              href="/services"
+              style={{
+                display: 'inline-block',
+                padding: '14px 18px',
+                borderRadius: 10,
+                border: '1px solid #111',
+                background: '#fff',
+                color: '#111',
+                textDecoration: 'none',
+                fontWeight: 700,
+              }}
+            >
+              Zur Serviceübersicht
+            </Link>
+          </div>
+        </div>
+      ) : currentStep ? (
         <div
           style={{
             border: '1px solid #ddd',
@@ -181,6 +247,23 @@ export default async function ServiceOrderStepsPage({
         >
           <h2>Keine weiteren Serviceschritte</h2>
           <p>Der Service ist bereit für den Test.</p>
+
+          <Link
+            href={`/service-orders/${serviceOrderId}/test`}
+            style={{
+              display: 'inline-block',
+              marginTop: 16,
+              padding: '14px 18px',
+              borderRadius: 10,
+              border: '1px solid #111',
+              background: '#111',
+              color: '#fff',
+              textDecoration: 'none',
+              fontWeight: 700,
+            }}
+          >
+            Abschlusstest starten
+          </Link>
         </div>
       )}
 
@@ -197,7 +280,9 @@ export default async function ServiceOrderStepsPage({
                   padding: 12,
                   marginBottom: 10,
                   background:
-                    step.step_number === currentStepNumber ? '#f5f5f5' : '#fff',
+                    step.step_number === currentStepNumber && !serviceIsInTest
+                      ? '#f5f5f5'
+                      : '#fff',
                 }}
               >
                 <strong>Schritt {step.step_number}:</strong> {step.title}
